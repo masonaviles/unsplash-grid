@@ -15,8 +15,6 @@ const IMAGES_PER_ROW = 5
 export default function ImageRow({
     rowImages,
     rowIndex,
-    expandedIndexes,
-    toggleExpanded,
     hoverIndex,
     setHoverIndex,
     setModalImage,

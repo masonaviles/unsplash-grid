@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const COLLAPSED_HEIGHT = 192
 
@@ -15,36 +15,43 @@ interface Props {
 
 export default function ImageCard({
     url,
-    isExpanded,
     isHovered,
-    onClick,
     onHoverEnter,
     onHoverLeave,
     onOpenModal,
 }: Props) {
     return (
-        <motion.div
-            layout
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
-            onClick={() => {
-                onOpenModal()
-            }}
+        <div
+            className="relative flex-1 cursor-pointer"
+            style={{ maxWidth: '20%', height: COLLAPSED_HEIGHT }}
+            onClick={onOpenModal}
             onMouseEnter={onHoverEnter}
             onMouseLeave={onHoverLeave}
-            className="relative flex-1 overflow-hidden rounded cursor-pointer group"
-            style={{ maxWidth: '20%' }}
         >
-            <motion.img
-                layout
+            {/* Base cropped image */}
+            <img
                 src={url}
                 alt=""
-                className="w-full rounded object-cover"
-                animate={{
-                    height: isExpanded || isHovered ? 'auto' : COLLAPSED_HEIGHT,
-                    scale: isExpanded || isHovered ? 1.03 : 1,
-                }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="w-full h-full object-cover rounded"
             />
-        </motion.div>
+
+
+            {/* Hovered full-ratio image exactly over original */}
+            <AnimatePresence>
+                {isHovered && (
+                    <motion.img
+                        key="hover-image"
+                        src={url}
+                        alt=""
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute top-0 left-0 w-full h-auto z-50 object-contain rounded shadow-lg"
+                        style={{ pointerEvents: 'none' }}
+                    />
+                )}
+            </AnimatePresence>
+        </div>
     )
 }
