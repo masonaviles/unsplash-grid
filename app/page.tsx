@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import ImageGrid from './components/ImageGrid'
 
 const TOTAL_IMAGES = 25
 
 export default function Home() {
   const [images, setImages] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
-  const [expandedIndexes, setExpandedIndexes] = useState<Set<number>>(new Set())
 
   const fetchImages = async () => {
     setLoading(true)
@@ -16,15 +16,6 @@ export default function Home() {
     setImages(data)
     setLoading(false)
   }
-
-  const toggleExpanded = (index: number) => {
-    setExpandedIndexes((prev) => {
-      const next = new Set(prev)
-      next.has(index) ? next.delete(index) : next.add(index)
-      return next
-    })
-  }
-
 
   useEffect(() => {
     fetchImages()
@@ -42,29 +33,7 @@ export default function Home() {
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 p-2">
-          {images.map((url, i) => {
-            const isExpanded = expandedIndexes.has(i)
-
-            return (
-              <div
-                key={i}
-                onClick={() => toggleExpanded(i)}
-                className="relative w-full overflow-hidden rounded cursor-pointer transition-all duration-500 group"
-              >
-                <img
-                  src={url}
-                  alt={`Unsplash ${i}`}
-                  className={`w-full object-cover rounded transition-all duration-500 ease-in-out
-          ${isExpanded ? 'h-auto' : 'h-48'} group-hover:h-auto`}
-                />
-              </div>
-            )
-          })}
-
-        </div>
-      </div>
+      <ImageGrid images={images} />
     </main>
   )
 }
