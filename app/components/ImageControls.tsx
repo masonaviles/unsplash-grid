@@ -37,7 +37,7 @@ export default function ImageControls({
                     type="submit"
                     className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer"
                 >
-                    Search Random
+                    Search
                 </button>
             </form>
 
@@ -47,7 +47,7 @@ export default function ImageControls({
                     disabled={loading}
                     className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-500 cursor-pointer"
                 >
-                    {loading ? 'Loading...' : 'Refresh Random'}
+                    {loading ? 'Loading...' : 'Shuffle'}
                 </button>
             </div>
         </div>

@@ -16,7 +16,9 @@ export default function Home() {
   const fetchImages = useCallback(
     async (tag = '', append = false) => {
       setLoading(true)
-      const res = await fetch(`/api/random-photos?count=${TOTAL_IMAGES}&query=${tag}`)
+      const res = await fetch(
+        `/api/random-photos?count=${TOTAL_IMAGES}${tag ? `&query=${encodeURIComponent(tag)}` : ''}`
+      )
       const data = await res.json()
       setImages((prev) => (append ? [...prev, ...data] : data))
       setLoading(false)
@@ -44,20 +46,30 @@ export default function Home() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const buffer = 200
-      const reachedBottom =
-        window.innerHeight + window.scrollY >= document.body.offsetHeight - buffer
+      if (loading) return
 
-      if (reachedBottom && !loading) {
-        const nextPage = page + 1
-        setPage(nextPage)
-        fetchImages(query, true)
+      const buffer = 300
+      const scrollY = window.scrollY
+      const visible = window.innerHeight
+      const pageHeight = document.body.offsetHeight
+      const reachedBottom = scrollY + visible >= pageHeight - buffer
+
+      if (reachedBottom) {
+        console.log('📦 Fetching next batch...')
+        pageRef.current += 1
+        setPage(pageRef.current)
+        fetchImages(true)
       }
     }
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [page, loading, query, fetchImages])
+    const throttledScroll = () => {
+      requestAnimationFrame(handleScroll)
+    }
+
+    window.addEventListener('scroll', throttledScroll)
+    return () => window.removeEventListener('scroll', throttledScroll)
+  }, [loading, fetchImages])
+
 
   return (
     <main className="w-screen flex flex-col">
