@@ -7,11 +7,10 @@ const COLLAPSED_HEIGHT = 192
 interface Props {
     index: number
     url: string
-    isExpanded: boolean
     isHovered: boolean
-    onClick: () => void
     onHoverEnter: () => void
     onHoverLeave: () => void
+    onOpenModal: () => void
 }
 
 export default function ImageCard({
@@ -21,12 +20,15 @@ export default function ImageCard({
     onClick,
     onHoverEnter,
     onHoverLeave,
+    onOpenModal,
 }: Props) {
     return (
         <motion.div
             layout
             transition={{ duration: 0.4, ease: 'easeInOut' }}
-            onClick={onClick}
+            onClick={() => {
+                onOpenModal()
+            }}
             onMouseEnter={onHoverEnter}
             onMouseLeave={onHoverLeave}
             className="relative flex-1 overflow-hidden rounded cursor-pointer group"

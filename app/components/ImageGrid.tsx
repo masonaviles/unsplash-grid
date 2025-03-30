@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import ImageRow from './ImageRow'
+import FullscreenModal from './FullscreenModal'
 
 const IMAGES_PER_ROW = 5
 
@@ -14,16 +15,8 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
 }
 
 export default function ImageGrid({ images }: { images: string[] }) {
-    const [expandedIndexes, setExpandedIndexes] = useState<Set<number>>(new Set())
     const [hoverIndex, setHoverIndex] = useState<number | null>(null)
-
-    const toggleExpanded = (index: number) => {
-        setExpandedIndexes((prev) => {
-            const next = new Set(prev)
-            next.has(index) ? next.delete(index) : next.add(index)
-            return next
-        })
-    }
+    const [modalImage, setModalImage] = useState<string | null>(null)
 
     return (
         <div className="flex-1 overflow-y-auto px-2 py-4 space-y-4">
@@ -32,12 +25,15 @@ export default function ImageGrid({ images }: { images: string[] }) {
                     key={rowIndex}
                     rowImages={row}
                     rowIndex={rowIndex}
-                    expandedIndexes={expandedIndexes}
-                    toggleExpanded={toggleExpanded}
                     hoverIndex={hoverIndex}
                     setHoverIndex={setHoverIndex}
+                    setModalImage={setModalImage}
                 />
             ))}
+
+            {modalImage && (
+                <FullscreenModal image={modalImage} onClose={() => setModalImage(null)} />
+            )}
         </div>
     )
 }
