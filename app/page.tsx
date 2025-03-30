@@ -13,13 +13,17 @@ export default function Home() {
   const [searchInput, setSearchInput] = useState('')
   const [page, setPage] = useState(1)
 
-  const fetchImages = useCallback(async (tag = '', append = false) => {
-    setLoading(true)
-    const res = await fetch(`/api/random-photos?count=${TOTAL_IMAGES}&query=${tag}`)
-    const data = await res.json()
-    setImages((prev) => (append ? [...prev, ...data] : data))
-    setLoading(false)
-  }, [])
+  const fetchImages = useCallback(
+    async (tag = '', append = false) => {
+      setLoading(true)
+      const res = await fetch(`/api/random-photos?count=${TOTAL_IMAGES}&query=${tag}`)
+      const data = await res.json()
+      setImages((prev) => (append ? [...prev, ...data] : data))
+      setLoading(false)
+    },
+    []
+  )
+
 
 
   useEffect(() => {
@@ -27,9 +31,10 @@ export default function Home() {
   }, [])
 
   const handleSearch = () => {
-    setQuery(searchInput)
+    const tag = searchInput
+    setQuery(tag)
     setPage(1)
-    fetchImages(searchInput, false)
+    fetchImages(tag, false)
   }
 
   const handleRefresh = () => {
@@ -55,7 +60,7 @@ export default function Home() {
   }, [page, loading, query, fetchImages])
 
   return (
-    <main className="h-screen w-screen flex flex-col">
+    <main className="w-screen flex flex-col">
       <ImageControls
         searchInput={searchInput}
         setSearchInput={setSearchInput}
