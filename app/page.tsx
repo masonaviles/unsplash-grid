@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import ImageGrid from './components/ImageGrid'
 import ImageControls from './components/ImageControls'
 
@@ -11,14 +11,16 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [query, setQuery] = useState('')
   const [searchInput, setSearchInput] = useState('')
+  const [page, setPage] = useState(1)
 
-  const fetchImages = async (tag?: string) => {
+  const fetchImages = useCallback(async (tag = '', append = false) => {
     setLoading(true)
-    const res = await fetch(`/api/random-photos?count=${TOTAL_IMAGES}&query=${tag || ''}`)
+    const res = await fetch(`/api/random-photos?count=${TOTAL_IMAGES}&query=${tag}`)
     const data = await res.json()
-    setImages(data)
+    setImages((prev) => (append ? [...prev, ...data] : data))
     setLoading(false)
-  }
+  }, [])
+
 
   useEffect(() => {
     fetchImages()
@@ -26,12 +28,31 @@ export default function Home() {
 
   const handleSearch = () => {
     setQuery(searchInput)
-    fetchImages(searchInput)
+    setPage(1)
+    fetchImages(searchInput, false)
   }
 
   const handleRefresh = () => {
-    fetchImages(query)
+    setPage(1)
+    fetchImages(query, false)
   }
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const buffer = 200
+      const reachedBottom =
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - buffer
+
+      if (reachedBottom && !loading) {
+        const nextPage = page + 1
+        setPage(nextPage)
+        fetchImages(query, true)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [page, loading, query, fetchImages])
 
   return (
     <main className="h-screen w-screen flex flex-col">
@@ -44,6 +65,10 @@ export default function Home() {
       />
 
       <ImageGrid images={images} />
+      {loading && (
+        <div className="text-center py-4 text-white text-sm">Loading more images...</div>
+      )}
+
     </main>
   )
 }
