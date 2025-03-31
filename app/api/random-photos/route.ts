@@ -1,5 +1,21 @@
 import { NextResponse } from 'next/server'
 
+interface UnsplashImage {
+  id: string
+  urls: {
+    small: string
+    full: string
+  }
+}
+
+interface UnsplashTag {
+  title: string
+}
+
+interface UnsplashDetailResponse {
+  tags?: UnsplashTag[]
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const count = searchParams.get('count') || '20'
@@ -21,10 +37,10 @@ export async function GET(req: Request) {
   }
 
   const data = await res.json()
-  const images = query ? data.results : Array.isArray(data) ? data : [data]
+  const images: UnsplashImage[] = query ? data.results : Array.isArray(data) ? data : [data]
 
   const enrichedImages = await Promise.all(
-    images.map(async (img: any) => {
+    images.map(async (img) => {
       const detailRes = await fetch(`https://api.unsplash.com/photos/${img.id}`, {
         headers: {
           Authorization: `Client-ID ${accessKey}`,
@@ -33,12 +49,12 @@ export async function GET(req: Request) {
 
       if (!detailRes.ok) return null
 
-      const details = await detailRes.json()
+      const details: UnsplashDetailResponse = await detailRes.json()
 
       return {
         small: img.urls.small,
         full: img.urls.full,
-        tags: (details.tags || []).map((tag: any) => tag.title),
+        tags: details.tags?.map((tag) => tag.title) || [],
       }
     })
   )
