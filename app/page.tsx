@@ -13,31 +13,32 @@ export default function Home() {
   const [searchInput, setSearchInput] = useState('')
 
   const fetchImages = useCallback(
-    async (tag = '', append = false) => {
+    async (tag = '') => {
       setLoading(true)
       const res = await fetch(
         `/api/random-photos?count=${TOTAL_IMAGES}${tag ? `&query=${encodeURIComponent(tag)}` : ''}`
       )
       const data = await res.json()
-      setImages((prev) => (append ? [...prev, ...data] : data))
+      setImages(data)
       setLoading(false)
     },
     []
   )
+
 
   useEffect(() => {
     fetchImages()
   }, [])
 
   const handleSearch = () => {
-    const tag = searchInput
-    setQuery(tag)
-    fetchImages(tag, false)
+    setQuery(searchInput)
+    fetchImages(searchInput)
   }
 
   const handleRefresh = () => {
-    fetchImages(query, false)
+    fetchImages(query)
   }
+
 
   return (
     <main className="w-screen flex flex-col">

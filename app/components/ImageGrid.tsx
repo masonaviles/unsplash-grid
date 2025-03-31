@@ -14,7 +14,12 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
     return result
 }
 
-export default function ImageGrid({ images }: { images: string[] }) {
+export default function ImageGrid({
+    images,
+}: {
+    images: { small: string; full: string; tags: string[] }[]
+}) {
+
     const [hoverIndex, setHoverIndex] = useState<number | null>(null)
     const [modalImage, setModalImage] = useState<string | null>(null)
 
