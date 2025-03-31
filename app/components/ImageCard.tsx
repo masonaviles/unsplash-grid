@@ -8,6 +8,7 @@ interface Props {
     index: number
     url: string
     isHovered: boolean
+    tags?: string[] // ✅ new
     onHoverEnter: () => void
     onHoverLeave: () => void
     onOpenModal: () => void
@@ -15,6 +16,7 @@ interface Props {
 
 export default function ImageCard({
     url,
+    tags = [],
     isHovered,
     onHoverEnter,
     onHoverLeave,
@@ -35,6 +37,30 @@ export default function ImageCard({
                 className="w-full h-full object-cover rounded"
             />
 
+            {/* Tags overlay */}
+            <AnimatePresence>
+                {isHovered && tags.length > 0 && (
+                    <motion.div
+                        key="tags"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute top-0 left-0 w-full px-2 py-1 bg-black/60 text-white text-xs z-40 rounded-t"
+                    >
+                        <div className="flex flex-wrap gap-1">
+                            {tags.map((tag, idx) => (
+                                <span
+                                    key={idx}
+                                    className="bg-white/10 px-2 py-0.5 rounded"
+                                >
+                                    #{tag}
+                                </span>
+                            ))}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Hovered full-ratio image exactly over original */}
             <AnimatePresence>
@@ -47,7 +73,7 @@ export default function ImageCard({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="absolute top-0 left-0 w-full h-auto z-50 object-contain rounded shadow-lg"
+                        className="absolute top-0 left-0 w-full h-auto z-30 object-contain rounded shadow-lg"
                         style={{ pointerEvents: 'none' }}
                     />
                 )}

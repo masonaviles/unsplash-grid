@@ -7,11 +7,10 @@ import ImageControls from './components/ImageControls'
 const TOTAL_IMAGES = 25
 
 export default function Home() {
-  const [images, setImages] = useState<string[]>([])
+  const [images, setImages] = useState<{ small: string; full: string; tags: string[] }[]>([])
   const [loading, setLoading] = useState(false)
   const [query, setQuery] = useState('')
   const [searchInput, setSearchInput] = useState('')
-  const [page, setPage] = useState(1)
 
   const fetchImages = useCallback(
     async (tag = '', append = false) => {
@@ -26,8 +25,6 @@ export default function Home() {
     []
   )
 
-
-
   useEffect(() => {
     fetchImages()
   }, [])
@@ -35,41 +32,12 @@ export default function Home() {
   const handleSearch = () => {
     const tag = searchInput
     setQuery(tag)
-    setPage(1)
     fetchImages(tag, false)
   }
 
   const handleRefresh = () => {
-    setPage(1)
     fetchImages(query, false)
   }
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (loading) return
-
-      const buffer = 300
-      const scrollY = window.scrollY
-      const visible = window.innerHeight
-      const pageHeight = document.body.offsetHeight
-      const reachedBottom = scrollY + visible >= pageHeight - buffer
-
-      if (reachedBottom) {
-        console.log('📦 Fetching next batch...')
-        pageRef.current += 1
-        setPage(pageRef.current)
-        fetchImages(true)
-      }
-    }
-
-    const throttledScroll = () => {
-      requestAnimationFrame(handleScroll)
-    }
-
-    window.addEventListener('scroll', throttledScroll)
-    return () => window.removeEventListener('scroll', throttledScroll)
-  }, [loading, fetchImages])
-
 
   return (
     <main className="w-screen flex flex-col">

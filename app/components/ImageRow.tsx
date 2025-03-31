@@ -3,12 +3,17 @@
 import ImageCard from './ImageCard'
 
 interface Props {
-    rowImages: string[]
+    rowImages: {
+        small: string
+        full: string
+        tags: string[]
+    }[]
     rowIndex: number
     hoverIndex: number | null
     setHoverIndex: (index: number | null) => void
     setModalImage: (url: string) => void
 }
+
 
 const IMAGES_PER_ROW = 5
 
@@ -21,7 +26,7 @@ export default function ImageRow({
 }: Props) {
     return (
         <div className="flex gap-2 items-center">
-            {rowImages.map((url, i) => {
+            {rowImages.map((img, i) => {
                 const globalIndex = rowIndex * IMAGES_PER_ROW + i
                 const isHovered = hoverIndex === globalIndex
 
@@ -29,12 +34,14 @@ export default function ImageRow({
                     <ImageCard
                         key={globalIndex}
                         index={globalIndex}
-                        url={url}
+                        url={img.small}
                         isHovered={isHovered}
                         onHoverEnter={() => setHoverIndex(globalIndex)}
                         onHoverLeave={() => setHoverIndex(null)}
-                        onOpenModal={() => setModalImage(url)}
+                        onOpenModal={() => setModalImage(img.full)}
+                        tags={img.tags}
                     />
+
                 )
             })}
         </div>
