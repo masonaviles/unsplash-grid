@@ -87,7 +87,7 @@ Just make sure to set the UNSPLASH_ACCESS_KEY as an environment variable in the 
 ---
 
 ## 🧾 License
-MIT © [Your Name or Company]
+MIT © Mason Aviles
 
 ---
 
