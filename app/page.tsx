@@ -129,7 +129,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchInitialImages = async () => {
-      if (isRateLimited(true)) {
+      if (isRateLimited()) {
         console.warn('API is rate-limited. Using fallback images.')
         setImages(PLACEHOLDER_IMAGES)
         return
