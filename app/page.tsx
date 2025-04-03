@@ -16,38 +16,38 @@ interface ImageData {
   tags: string[]
 }
 
-function isRateLimited(showTimer = false): boolean {
+function startRateLimitTimer(lastFailure: number) {
+  const interval = setInterval(() => {
+    const remaining = FAILURE_TIMEOUT_MS - (Date.now() - lastFailure)
+
+    if (remaining <= 0) {
+      console.clear()
+      console.log('%c🟢 Rate limit expired. You can now fetch from the API.', 'color: green')
+      clearInterval(interval)
+      return
+    }
+
+    const minutes = Math.ceil(remaining / 60000)
+
+    console.clear()
+    console.log(`%c⏳ Next API attempt in ${minutes} minute${minutes === 1 ? '' : 's'}`, 'color: orange; font-weight: bold')
+  }, 60_000) // 1 minute
+}
+
+
+function isRateLimited(): boolean {
   const lastFailure = localStorage.getItem(LAST_FAILURE_KEY)
   if (!lastFailure) return false
 
   const elapsed = Date.now() - Number(lastFailure)
-  const remaining = FAILURE_TIMEOUT_MS - elapsed
+  const limited = elapsed < FAILURE_TIMEOUT_MS
 
-  const limited = remaining > 0
-  if (limited && showTimer) {
-    const interval = setInterval(() => {
-      const now = Date.now()
-      const remaining = FAILURE_TIMEOUT_MS - (now - Number(lastFailure))
-
-      if (remaining <= 0) {
-        console.log('%c🟢 Rate limit expired. You can now fetch from the API.', 'color: green')
-        clearInterval(interval)
-        return
-      }
-
-      const minutes = Math.floor(remaining / 60000)
-      const seconds = Math.floor((remaining % 60000) / 1000)
-
-      console.log(
-        `%c⏳ Next API attempt allowed in ${minutes}m ${seconds}s`,
-        'color: orange; font-weight: bold;'
-      )
-    }, 1000)
+  if (limited) {
+    startRateLimitTimer(Number(lastFailure))
   }
 
   return limited
 }
-
 
 const PLACEHOLDER_IMAGES: ImageData[] = Array.from({ length: TOTAL_IMAGES }).map((_, i) => ({
   small: `https://picsum.photos/400?random=${i + 1}`,
