@@ -8,7 +8,7 @@ interface Props {
     index: number
     url: string
     isHovered: boolean
-    tags?: string[] // ✅ new
+    tags?: string[]
     onHoverEnter: () => void
     onHoverLeave: () => void
     onOpenModal: () => void
@@ -34,7 +34,7 @@ export default function ImageCard({
             <img
                 src={url}
                 alt=""
-                className="w-full h-full object-cover rounded"
+                className="w-full h-full object-cover"
             />
 
             {/* Tags overlay */}

@@ -14,6 +14,12 @@ interface ImageData {
   tags: string[]
 }
 
+const PLACEHOLDER_IMAGES: ImageData[] = Array.from({ length: TOTAL_IMAGES }).map((_, i) => ({
+  small: `https://picsum.photos/400?random=${i + 1}`,
+  full: `https://picsum.photos/1200?random=${i + 1}`,
+  tags: ['placeholder'],
+}))
+
 export default function Home() {
   const [images, setImages] = useState<ImageData[]>([])
   const [loading, setLoading] = useState(false)
@@ -21,7 +27,6 @@ export default function Home() {
   const [searchInput, setSearchInput] = useState('')
   const [imageCache, setImageCache] = useState<ImageData[]>([])
 
-  // 🧠 Load cached images from localStorage
   useEffect(() => {
     const cachedJson = localStorage.getItem(CACHE_KEY)
     if (cachedJson) {
@@ -36,7 +41,6 @@ export default function Home() {
     }
   }, [])
 
-  // 💾 Save cache to localStorage when updated
   useEffect(() => {
     localStorage.setItem(CACHE_KEY, JSON.stringify(imageCache.slice(0, 200)))
   }, [imageCache])
@@ -46,7 +50,6 @@ export default function Home() {
       setLoading(true)
       const isQuerying = tag.trim().length > 0
 
-      // Serve from cache if not querying
       if (!isQuerying && imageCache.length >= TOTAL_IMAGES) {
         console.log('Serving from localStorage cache...')
         const shuffled = [...imageCache].sort(() => 0.5 - Math.random())
@@ -69,7 +72,7 @@ export default function Home() {
               typeof img?.full === 'string' &&
               Array.isArray(img?.tags)
           )
-          : []
+          : PLACEHOLDER_IMAGES
 
         if (!isQuerying) {
           const updatedCache = [...imageCache, ...safeData].slice(0, 200)
@@ -79,7 +82,8 @@ export default function Home() {
         setImages(isQuerying ? safeData : safeData.slice(0, TOTAL_IMAGES))
       } catch (e) {
         console.error('Failed to fetch images:', e)
-        setImages([])
+        console.warn('Using fallback placeholder images.')
+        setImages(PLACEHOLDER_IMAGES)
       } finally {
         setLoading(false)
       }
@@ -111,7 +115,7 @@ export default function Home() {
               typeof img?.full === 'string' &&
               Array.isArray(img?.tags)
           )
-          : []
+          : PLACEHOLDER_IMAGES
 
         const updatedCache = [...imageCache, ...safeData].slice(0, 200)
         setImageCache(updatedCache)
@@ -126,7 +130,7 @@ export default function Home() {
 
     fetchInitialImages()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // ✅ run only once on mount
+  }, [])
 
 
 

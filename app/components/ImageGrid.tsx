@@ -13,7 +13,7 @@ export default function ImageGrid({
     const [modalImage, setModalImage] = useState<string | null>(null)
 
     return (
-        <div className="flex flex-wrap gap-2 px-2 py-4">
+        <div className="flex flex-wrap gap-0 px-0 py-4">
             {images.map((img, index) => (
                 <ImageCard
                     key={index}
