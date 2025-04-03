@@ -16,12 +16,36 @@ interface ImageData {
   tags: string[]
 }
 
-function isRateLimited(): boolean {
+function isRateLimited(showTimer = false): boolean {
   const lastFailure = localStorage.getItem(LAST_FAILURE_KEY)
   if (!lastFailure) return false
 
   const elapsed = Date.now() - Number(lastFailure)
-  return elapsed < FAILURE_TIMEOUT_MS
+  const remaining = FAILURE_TIMEOUT_MS - elapsed
+
+  const limited = remaining > 0
+  if (limited && showTimer) {
+    const interval = setInterval(() => {
+      const now = Date.now()
+      const remaining = FAILURE_TIMEOUT_MS - (now - Number(lastFailure))
+
+      if (remaining <= 0) {
+        console.log('%c🟢 Rate limit expired. You can now fetch from the API.', 'color: green')
+        clearInterval(interval)
+        return
+      }
+
+      const minutes = Math.floor(remaining / 60000)
+      const seconds = Math.floor((remaining % 60000) / 1000)
+
+      console.log(
+        `%c⏳ Next API attempt allowed in ${minutes}m ${seconds}s`,
+        'color: orange; font-weight: bold;'
+      )
+    }, 1000)
+  }
+
+  return limited
 }
 
 
@@ -105,7 +129,7 @@ export default function Home() {
 
   useEffect(() => {
     const fetchInitialImages = async () => {
-      if (isRateLimited()) {
+      if (isRateLimited(true)) {
         console.warn('API is rate-limited. Using fallback images.')
         setImages(PLACEHOLDER_IMAGES)
         return
@@ -123,8 +147,12 @@ export default function Home() {
 
       try {
         const res = await fetch(`/api/random-photos?count=${CACHE_THRESHOLD}`)
+
+        if (!res.ok) {
+          throw new Error(`API failed with status ${res.status}`)
+        }
+
         const data = await res.json()
-        console.log('Fetched image data:', data)
 
         const safeData = Array.isArray(data)
           ? data.filter(
@@ -133,7 +161,11 @@ export default function Home() {
               typeof img?.full === 'string' &&
               Array.isArray(img?.tags)
           )
-          : PLACEHOLDER_IMAGES
+          : null
+
+        if (!safeData || safeData.length === 0) {
+          throw new Error('API returned invalid or empty data')
+        }
 
         const updatedCache = [...imageCache, ...safeData].slice(0, 200)
         setImageCache(updatedCache)
@@ -142,7 +174,8 @@ export default function Home() {
         console.error('Failed to fetch images:', e)
         localStorage.setItem(LAST_FAILURE_KEY, String(Date.now()))
         setImages(PLACEHOLDER_IMAGES)
-      } finally {
+      }
+      finally {
         setLoading(false)
       }
     }
