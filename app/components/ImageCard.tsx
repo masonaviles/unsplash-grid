@@ -24,8 +24,8 @@ export default function ImageCard({
 }: Props) {
     return (
         <div
-            className="relative flex-1 cursor-pointer"
-            style={{ maxWidth: '20%', height: COLLAPSED_HEIGHT }}
+            className="relative w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 cursor-pointer"
+            style={{ height: COLLAPSED_HEIGHT }}
             onClick={onOpenModal}
             onMouseEnter={onHoverEnter}
             onMouseLeave={onHoverLeave}
