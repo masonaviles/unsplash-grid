@@ -16,24 +16,29 @@ interface ImageData {
   tags: string[]
 }
 
+let lastLog = ''
+
 function startRateLimitTimer(lastFailure: number) {
+  const logId = '⏳ Next API attempt in'
+
   const interval = setInterval(() => {
     const remaining = FAILURE_TIMEOUT_MS - (Date.now() - lastFailure)
 
     if (remaining <= 0) {
-      console.clear()
       console.log('%c🟢 Rate limit expired. You can now fetch from the API.', 'color: green')
       clearInterval(interval)
       return
     }
 
     const minutes = Math.ceil(remaining / 60000)
+    const msg = `${logId} ${minutes} minute${minutes === 1 ? '' : 's'}`
 
-    console.clear()
-    console.log(`%c⏳ Next API attempt in ${minutes} minute${minutes === 1 ? '' : 's'}`, 'color: orange; font-weight: bold')
-  }, 60_000) // 1 minute
+    if (msg !== lastLog) {
+      console.log(`%c${msg}`, 'color: orange; font-weight: bold')
+      lastLog = msg
+    }
+  }, 60_000) // every 1 minute
 }
-
 
 function isRateLimited(): boolean {
   const lastFailure = localStorage.getItem(LAST_FAILURE_KEY)
@@ -129,8 +134,10 @@ export default function Home() {
 
   useEffect(() => {
     const fetchInitialImages = async () => {
-      if (isRateLimited()) {
+      const lastFailure = Number(localStorage.getItem(LAST_FAILURE_KEY))
+      if (lastFailure && Date.now() - lastFailure < FAILURE_TIMEOUT_MS) {
         console.warn('API is rate-limited. Using fallback images.')
+        startRateLimitTimer(lastFailure)
         setImages(PLACEHOLDER_IMAGES)
         return
       }
